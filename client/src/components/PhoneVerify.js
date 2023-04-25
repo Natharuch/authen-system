@@ -25,7 +25,7 @@ const PhoneVerify = () => {
             })
             .catch((err) => console.error(err));
     };
-    const handleSubmit = (e) => {
+    const handleSubmit = (e) => { 
         e.preventDefault();
         //👇🏻 Calls the function
         postVerification();
