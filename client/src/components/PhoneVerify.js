@@ -1,119 +1,89 @@
 import React, { useState } from "react";
-// import React, { Component } from "react";
 import { useNavigate } from "react-router-dom";
-import { render } from "react-dom";
-
-import speakeasy from "speakeasy";
-import QRCode from "qrcode";
-import CryptoJS from "crypto-js";
-
-const [code, setCode] = useState("");
-const navigate = useNavigate();
+const qrcode = require ('qrcode')
+const speakeasy = require('speakeasy')
 
 
-const PhoneVerify = () => {
-    state = {
-        image: "",
-        secret: "",
-        validCode: "",
-        isCodeValid: null
-      };
+var secret = speakeasy.generateSecret({
+    name : "Natharuch"
+})
+    console.log(secret)
 
-      const componentDidMount = () => {
-        // const secret = speakeasy.generateSecret({name: 'Adidas'});
-        const secret = {
-          ascii: "?:SD%oDD<E!^q^1N):??&QkeqRkhkpt&",
-          base32: "H45FGRBFN5CEIPCFEFPHCXRRJYUTUPZ7EZIWWZLRKJVWQ23QOQTA",
-          hex: "3f3a5344256f44443c45215e715e314e293a3f3f26516b6571526b686b707426",
-          otpauth_url:
-            "otpauth://totp/Adidas%Adidas?secret=H45FGRBFN5CEIPCFEFPHCXRRJYUTUPZ7EZIWWZLRKJVWQ23QOQTA"
-        };
-        // console.log('SECRET -->', secret);
+qrcode.toDataURL(secret.otpauth_url, (err,data)=>{
+    console.log (data)
+});
+var verified = speakeasy.totp.verify({
+    secret: '!s^E,k/7,WGo$]mPQ5w{Pr&Ug8hW9uAz',
+    encoding :'ascii',
+    token : '000000' });
+    console.log(verified)
+    var authencode = 'token';
+        console.log(verified)
+    const navigate = useNavigate();
+    const authencode = useState("");
+    const PhoneVerify = () => {
+    const postVerification = async () => {
+        fetch("http://localhost:4000/api/verification", {
+            method: "POST",
+            body: JSON.stringify([code]),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then(async(res) => res.json())
+            .then(async(data) => {
+                if (data.error_message) {
+                    alert(data.error_message);
+                } else {
+                    //👇🏻 Navigates to the dashboard page
+                    navigate("/dashboard");    
+                }
+            })
+            .catch((err) => console.error(err));
+    }; 
+    const handleSubmit = (e) => {  
+        e.preventDefault();
+        //👇🏻 Calls the function
+        postVerification();
+        setCode("");
+    };
+
+    const QRCode = 'qrcode'
+    window.addEventListener("load", () => {
+        const uri = document.getElementById("qrCodeData").getAttribute('data-url');
+        new QRCode(document.getElementById("qrCode"),
+          {
+            text: uri,
+            width: 150,
+            height: 150
+          });
+      });
     
-        // Backup codes
-        const backupCodes = [];
-        const hashedBackupCodes = [];
-        // const randomCode = (Math.random() * 10000000000).toFixed();
-        // console.log('randomCode -->', randomCode);
-    
-        for (let i = 0; i < 10; i++) {
-          const randomCode = (Math.random() * 10000000000).toFixed();
-          const encrypted = CryptoJS.AES.encrypt(
-            randomCode,
-            secret.base32
-          ).toString();
-          backupCodes.push(randomCode);
-          hashedBackupCodes.push(encrypted);
-        }
-    
-        console.log("backupCodes ----->", backupCodes);
-        console.log("hashedBackupCodes ----->", hashedBackupCodes);
-    
-        // const encrypted = CryptoJS.AES.encrypt(randomCode, secret.base32).toString();
-        // console.log('encrypted -->', encrypted)
-        // var bytes  = CryptoJS.AES.decrypt(encrypted, secret.base32);
-        // var originalText = bytes.toString(CryptoJS.enc.Utf8);
-        // console.log('originalText --->', originalText);
-    
-        QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
-          this.setState({ image: image_data, secret });
-        });
-      }
-    
-      getCode = () => {
-        const { base32, hex } = this.state.secret;
-        const code = speakeasy.totp({
-          secret: hex,
-          encoding: "hex",
-          algorithm: "sha1"
-        });
-    
-        this.setState({ validCode: code });
-      };
-    
-      verifyCode = () => {
-        const { inputValue, secret } = this.state;
-        const { base32, hex } = secret;
-        const isVerified = speakeasy.totp.verify({
-          secret: hex,
-          encoding: "hex",
-          token: inputValue,
-          window: 1
-        });
-    
-        console.log("isVerified -->", isVerified);
-        if (this.setState){({ isCodeValid: isVerified })
-        navigate("/dashboard")
-    } else { console.log("miss code")}
-            
-      };
-    
-      render() {
-        const { image, validCode, isCodeValid } = this.state;
-        return (
-          <div>
-            <img src={`${image}`} />
-            {
-              // <div>
-              //   <h2>{validCode}</h2>
-              //   <button onClick={this.getCode}>Get valid code</button>
-              // </div>
-            }
-    
-            <div style={{ marginTop: 20 }}>Verify code</div>
-            <input
-              type="number"
-              onChange={e => this.setState({ inputValue: e.target.value })}
-            />
-            <button onClick={this.verifyCode}>Verify</button>
-            {isCodeValid !== null && <div>{isCodeValid ? "✅" : "❌"}</div>}
-          </div>
-        );
-        s;
-      }
-    }
-    
-    render(<PhoneVerify />, document.getElementById("root"));
-    
+    return (
+        <div className='verify'>
+            <h2 style={{ marginBottom: "30px" }}>Verify your Phone number</h2>
+            <form className='verify__form' onSubmit={handleSubmit}>
+            <div id="qrcode"></div>
+                <script type="text/javascript">
+                new QRCode(document.getElementById("qrcode"), "http://jindo.dev.naver.com/collie");
+                </script>
+
+                <label htmlFor='code' style={{ marginBottom: "10px" }}>
+                    A code has been sent your phone
+                </label>
+                <input
+                    type='text'
+                    name='code'  
+                    id='code'
+                    className='code'
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    required
+                />
+                <button className='codeBtn'>AUTHENTICATE</button>
+            </form>
+        </div>
+    );
+};
 
 export default PhoneVerify;

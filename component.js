@@ -12,7 +12,7 @@ class App extends Component {
     secret: "",
     validCode: "",
 
-    isCodeValid: null
+    isCodeValid: null 
   };
 
   componentDidMount() {
